@@ -1,4 +1,5 @@
 # ssGTM Client Template for elbwalker (elbwalker-ssgtm-client)
+# Server-Side Google Tag Manager Custom Client Template for elbwalker (sgtm-client-template)
 Custom client template (beta) for server-side Google Tag Manager. Receives walker.js events and optionally serves walker.js script. Optimized for use as gtag.js replacement for GA4.
 
 ## Client Configuration
