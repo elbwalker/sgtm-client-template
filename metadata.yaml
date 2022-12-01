@@ -1,0 +1,6 @@
+homepage: "https://www.markus-baersch.de"
+documentation: "https://github.com/mbaersch/elbwalker-ssgtm-client/#readme"
+versions:
+  # Latest version
+  - sha: xxxxxxxxx
+    changeNotes: Initial release.
