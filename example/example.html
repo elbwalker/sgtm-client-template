@@ -12,9 +12,11 @@
     SCRIPT CODE FOR MORE OPTIONS.
 -->
 <script async src="walker-init.js?v=9" 
-  data-endpoint="https://data.atomkraftwerke24.de/elbwalker" 
+  data-endpoint="https://httpbin.org/anything" 
+  data-sendimg="false" 
+  data-base64="false" 
   data-version="3"
-  data-walkerpath="https://data.atomkraftwerke24.de/fpw.js">
+  data-walkerpath="https://cdn.jsdelivr.net/npm/@elbwalker/walker.js@1.5.3/dist/walker.js">
 </script>
 
 <style>
@@ -36,6 +38,10 @@ No external ressources linked: find tracking initialization code in <a target="_
 href="walker-init.js">walker-init.js</a> to see how it works. A (simple) example for client id and 
 session handling can be found there as well. It demonstrates how to to collect events that can 
 populate a GA4 property.</p>
+
+<p>NOTE: this example sends events to <a href="https://httpbin.org/anything">https://httpbin.org/anything</a> 
+instead of a real ssGTM endpoint. Change the <em>data-endpoint</em> attribute to your own server and 
+endpoint URL where the elbwalker client is listening.</p>
 
 <h2>About Consent</h2>
 <p>This example "assumes" consent and uses localStorage and sessionStorage to persist client id, 

@@ -6,11 +6,11 @@ EXAMPLE walker.js TRACKING IMPLEMENTATION FOR SERVER-SIDE GTM
 
 //send as image in case of CORS issues
 window._walkerSettings = {}
-window._walkerSettings.sendAsImage = document.currentScript.getAttribute('data-sendimg') != "false";
-window._walkerSettings.sendBase64 = document.currentScript.getAttribute('data-base64') != "false";
+window._walkerSettings.sendAsImage = document.currentScript.getAttribute('data-sendimg') !== "false";
+window._walkerSettings.sendBase64 = document.currentScript.getAttribute('data-base64') !== "false";
 window._walkerSettings.version = document.currentScript.getAttribute('data-version');
 //ssGTM endpoint
-window._walkerSettings.endpointUrl = document.currentScript.getAttribute('data-endpoint') || "/elbwalker";
+window._walkerSettings.endpointUrl = document.currentScript.getAttribute('data-endpoint') || "https://httpbin.org/anything";
 //load walker.js from custom path
 window._walkerSettings.walkerpath = document.currentScript.getAttribute('data-walkerpath');
 
@@ -21,7 +21,7 @@ window._walkerSettings.doAnalytics = window.location.href.indexOf('noconsent') <
 
 //simple session and client handling - switch to cookies or move server-side if you like
 function getSessionData() {
-  if (window._walkerSettings.doAnalytics != true) return;
+  if (window._walkerSettings.doAnalytics !== true) return;
   var sts = window.sessionStorage.getItem("lg_sts");
   var sid = window.sessionStorage.getItem("lg_sid");
   var sct = window.localStorage.getItem("lg_sct") || 0;
@@ -93,7 +93,7 @@ function elb() {
   
   //add some "globals" to DOM as elements
   //TO DO: add other elements here, if needed in every event
-  if ((w._walkerSettings.sendBase64 != true) && 
+  if ((w._walkerSettings.sendBase64 !== true) && 
       (w._walkerSettings.sendAsImage === true)) {
       l = l.split("#")[0];
   } 
@@ -124,7 +124,7 @@ function elb() {
   elb("walker destination", { push: 
     function (event) {
       if (event.data && event.data.hash && 
-      (w._walkerSettings.sendBase64 != true) && 
+      (w._walkerSettings.sendBase64 !== true) && 
       (w._walkerSettings.sendAsImage === true)) {
       event.data.hash = event.data.hash.replace("#", "");
       } 
@@ -134,10 +134,12 @@ function elb() {
       obs = ""; 
       else if (w._walkerSettings.sendBase64 === true) 
       obs = btoa(unescape(encodeURIComponent(obs)));
-      var params = (obs != "") ? "?o=" + encodeURI(obs) : "";
+      var params = (obs !== "") ? "?o=" + encodeURI(obs) : "";
       if (w.XMLHttpRequest) e = new XMLHttpRequest();
-      if ((e != null) && (w._walkerSettings.sendAsImage != true)) {
+      if ((e != null) && (w._walkerSettings.sendAsImage !== true)) {
         e.open("POST", r, true);
+        //you might have to change this to "application/json" depending
+        //on your endpoint
         e.setRequestHeader("Content-Type", "text/plain");
         e.send(obs);
         //alternative method: use fetch() - okay for almost every browser
@@ -150,7 +152,7 @@ function elb() {
         );
         */
       } else  
-        (new Image).src = r + params;
+        (new Image()).src = r + params;
       //log event to console for debugging purposes 
       console.log(event);
     }
