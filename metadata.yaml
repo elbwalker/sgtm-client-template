@@ -1,5 +1,5 @@
-homepage: "https://www.markus-baersch.de"
-documentation: "https://github.com/mbaersch/elbwalker-ssgtm-client/#readme"
+homepage: "https://www.elbwalker.com"
+documentation: "https://github.com/elbwalker/sgtm-client-template/#readme"
 versions:
   # Latest version
   - sha: xxxxxxxxx
