@@ -71,7 +71,16 @@ The client template in ssGTM allows you to use different ways to control session
 </div> <!--cnt -->
 </body>
 <script>
-function sendPurchase() {
+/**
+ * send a purchase. Uses structure from the example at
+ * https://www.elbwalker.com/gallery/orderSummary with some changes:
+ * - all property names fit the GA4 e-commerce scheme at
+ *   https://developers.google.com/analytics/devguides/collection/ga4/ecommerce
+ * - an "event_name" parameter is added to the context object in order to overwrite
+ *   the elbwalker event name. That could also be achieved by using the event name
+ *   translation option in the ssGTM client.
+ */  
+ function sendPurchase() {
   elb("order complete", 
     {transaction_id:"0rd3r1d",
     net_value:72,
@@ -80,7 +89,7 @@ function sendPurchase() {
     tax:6.4,
     value:86.4,
     }, 
-    "load", 
+    "click", 
     {event_name: "purchase"}, 
     [{
       "type":"product",
