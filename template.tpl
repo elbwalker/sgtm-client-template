@@ -732,21 +732,6 @@ if (requestPath === '/elbwalker') {
   event.ga_session_number = snum;
   event.ga_session_id = sid;
 
-  //GA4 system properties 
-  var sprops = {};
-  var isStart = valueByPath(evtData, 
-      data.sessionStartPath || "globals.session_start") ? true : false;
-  isStart = isStart && (makeNumber(evtData.count) === 1);
-  if (isStart) sprops.ss = "1";
-  if (isStart && (makeNumber(snum) === 1)) sprops.fv = "1";
-  if (data.conversionNames.indexOf(evName) >= 0) sprops.c = "1";
-  if (data.sendAsDebug === true) sprops.dbg = "1";
-  if (sprops.ss || sprops.fv || sprops.dbg || sprops.c) 
-    event["x-ga-system_properties"] = sprops;
-
-  //everything except session start will be "engaged"
-  event['x-ga-mp2-seg'] = isStart == true ? "0" : "1"; 
-
   //use globals as event parameters
   if (data.globalsAsParams === true) {
     var dims = evtData.globals;
@@ -792,6 +777,22 @@ if (requestPath === '/elbwalker') {
     data.addEventParameters.forEach((v, i) => {
       event[v.paramName] = v.paramValue;
     });     
+  
+  //GA4 system properties
+  var sprops = {};
+  var isStart = valueByPath(evtData, 
+      data.sessionStartPath || "globals.session_start") ? true : false;
+  isStart = isStart && (makeNumber(evtData.count) === 1);
+  if (isStart) sprops.ss = "1";
+  if (isStart && (makeNumber(snum) === 1)) sprops.fv = "1";
+  //use final event_name value
+  if (data.conversionNames.indexOf(event.event_name) >= 0) sprops.c = "1";
+  if (data.sendAsDebug === true) sprops.dbg = "1";
+  if (sprops.ss || sprops.fv || sprops.dbg || sprops.c) 
+    event["x-ga-system_properties"] = sprops;
+
+  //everything except session start will be "engaged"
+  event['x-ga-mp2-seg'] = isStart == true ? "0" : "1"; 
   
   /*2DO: 
   ------------------------------------------------------------------------
