@@ -421,6 +421,13 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "type": "CHECKBOX",
+            "name": "globalsAsParams",
+            "checkboxText": "Add \"globals\" As Event Parameters",
+            "simpleValueType": true,
+            "defaultValue": true
+          },
+          {
+            "type": "CHECKBOX",
             "name": "contextAsParams",
             "checkboxText": "Add \"context\" As Event Parameters",
             "simpleValueType": true,
@@ -428,10 +435,15 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "type": "CHECKBOX",
-            "name": "globalsAsParams",
-            "checkboxText": "Add \"globals\" As Event Parameters",
+            "name": "dataAsParams",
+            "checkboxText": "Add \"data\" As Event Parameters",
             "simpleValueType": true,
             "defaultValue": true
+          },
+          {
+            "type": "LABEL",
+            "name": "labelObjInfo",
+            "displayName": "Note: When adding parameters from globals, context or data, keys with the same name will always contain the more specific value."
           },
           {
             "type": "SIMPLE_TABLE",
@@ -735,6 +747,16 @@ if (requestPath === '/elbwalker') {
   //everything except session start will be "engaged"
   event['x-ga-mp2-seg'] = isStart == true ? "0" : "1"; 
 
+  //use globals as event parameters
+  if (data.globalsAsParams === true) {
+    var dims = evtData.globals;
+    if (dims && typeof(dims === "object")) {
+      for (var key in dims) {
+        event[key] = dims[key];
+      }  
+    }
+  }
+  
   //use context data as event parameters
   if (data.contextAsParams === true) {
     var dims = evtData.context;
@@ -745,9 +767,9 @@ if (requestPath === '/elbwalker') {
     }
   }
 
-  //use globals as event parameters
-  if (data.globalsAsParams === true) {
-    var dims = evtData.globals;
+  //use data as event parameters
+  if (data.dataAsParams === true) {
+    var dims = evtData.data;
     if (dims && typeof(dims === "object")) {
       for (var key in dims) {
         event[key] = dims[key];
@@ -986,5 +1008,3 @@ scenarios: []
 ___NOTES___
 
 Created on 20.12.2020, 02:26:15
-
-

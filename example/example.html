@@ -58,6 +58,7 @@ The client template in ssGTM allows you to use different ways to control session
 <ul>
 <li>send event via attribute: <a data-elb="helloworld" data-elbaction="click" href="#">hello world!</a></li>
 <li>send virtual "page view" using JavaScript: <a href="#" onclick="elb('page view', { id: '/test/virtual/path1', title: 'Virtual Page 1'}, 'click', {some_property: 14} );">elb('page view', ...)</a></li>    
+<li>e-commerce: send "order complete" as "purchase" to GA4 (see code): <a href="#" onclick="sendPurchase(); return false;">send purchase</a></li>    
 </ul>
 <p style="margin-bottom:100%">scroll down to show demo promo element with visibility event...</p>
 
@@ -69,4 +70,41 @@ The client template in ssGTM allows you to use different ways to control session
 </div> <!--elbcontext -->
 </div> <!--cnt -->
 </body>
+<script>
+function sendPurchase() {
+  elb("order complete", 
+    {transaction_id:"0rd3r1d",
+    net_value:72,
+    currency:"EUR",
+    shipping:8,
+    tax:6.4,
+    value:86.4,
+    }, 
+    "load", 
+    {event_name: "purchase"}, 
+    [{
+      "type":"product",
+      "data":{
+        item_name:"Everyday Ruck Snack",
+        item_id:"sample01",
+        item_variant:"black",
+        quantity:1,
+        price:220,
+        currency:"EUR"
+      }
+    },
+    {
+      "type":"product",
+      "data":{
+        item_name:"Cool Cap",
+        item_id:"sample02",
+        item_variant:"green",
+        quantity:1,
+        price:39,
+        currency:"EUR"
+      }
+    }]
+  );  
+}  
+</script>
 </html>
