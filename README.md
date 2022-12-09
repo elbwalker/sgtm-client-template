@@ -84,7 +84,7 @@ gtag.js usually knows, what events are conversions and sends this information as
 ## Why Beta?
 There are still some things that have to be manually added in any existing implementation in order to fit the client`s expectations about what information gets sent in which section of incoming events. See help for every configuration field in this client for more information. 
 
-walker.js will be enhanced with some changes that will make the use of this client smoother. If you run into any problems or have ideas how to enhance this client, feel free to contribute or [open an issue](https://github.com/elbwalker/sgtm-client-template/issues/new)!
+walker.js will make the use of this client as easy as possible. Still, using walker.js for GA4 needs some additional information (see example). If you run into any problems or have ideas how to enhance this client, feel free to contribute or [open an issue](https://github.com/elbwalker/sgtm-client-template/issues/new)!
 
 ## Contact
 Contact [elbwalker](https://www.elbwalker.com/) for anything about walker.js implementation or reach out to [Markus Baersch](https://github.com/mbaersch) or [Justus Blümer](https://github.com/justusbluemer) about anything regarding this client template. 
