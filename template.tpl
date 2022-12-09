@@ -189,11 +189,7 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ],
-        "valueValidators": [
-          {
-            "type": "NON_EMPTY"
-          }
-        ]
+        "valueValidators": []
       },
       {
         "type": "TEXT",
@@ -208,11 +204,7 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ],
-        "valueValidators": [
-          {
-            "type": "NON_EMPTY"
-          }
-        ]
+        "valueValidators": []
       },
       {
         "type": "TEXT",
@@ -227,19 +219,15 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ],
-        "valueValidators": [
-          {
-            "type": "NON_EMPTY"
-          }
-        ]
+        "valueValidators": []
       },
       {
         "type": "TEXT",
         "name": "sessionIdSource",
         "displayName": "Session ID Source Path",
         "simpleValueType": true,
-        "defaultValue": "user.hash",
-        "help": "enter additional lookup path to session id information in incoming events (default: user.hash), if not sent as \"globals.session_started\". Will be a changing timestamp, if no value is present anywhere",
+        "defaultValue": "user.session",
+        "help": "enter additional lookup path to session id information in incoming events (default: user.session), if not sent as \"globals.session_started\". Will be a changing timestamp if no value is present anywhere",
         "enablingConditions": [
           {
             "paramName": "sessionDataSource",
@@ -269,7 +257,7 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Client ID Source Path",
         "simpleValueType": true,
         "defaultValue": "user.device",
-        "help": "enter lookup path to client id in incoming events (default: user.device). Will be set to session id if not available in request as \"user.device\" or \"user.hash\".",
+        "help": "enter lookup path to client id in incoming events (default: user.device). Will be set to session id if not available in request as \"user.device\" or \"user.session\".",
         "enablingConditions": [
           {
             "paramName": "sessionDataSource",
@@ -402,6 +390,27 @@ ___TEMPLATE_PARAMETERS___
     "subParams": [
       {
         "type": "GROUP",
+        "name": "endpointSettings",
+        "displayName": "Endpoint Settings",
+        "groupStyle": "NO_ZIPPY",
+        "subParams": [
+          {
+            "type": "TEXT",
+            "name": "endpointPath",
+            "displayName": "Endpoint Path",
+            "simpleValueType": true,
+            "help": "Enter a path where this client should listen for incoming events",
+            "valueValidators": [
+              {
+                "type": "NON_EMPTY"
+              }
+            ],
+            "defaultValue": "/elbwalker"
+          }
+        ]
+      },
+      {
+        "type": "GROUP",
         "name": "eventSettings",
         "displayName": "Event Model Options",
         "groupStyle": "NO_ZIPPY",
@@ -417,6 +426,13 @@ ___TEMPLATE_PARAMETERS___
             "checkboxText": "Include walker.js Event",
             "simpleValueType": true,
             "help": "check to add the complete received event as \"x-elb-event\"",
+            "defaultValue": true
+          },
+          {
+            "type": "CHECKBOX",
+            "name": "consentAsParams",
+            "checkboxText": "Add \"consent\" As Event Parameters",
+            "simpleValueType": true,
             "defaultValue": true
           },
           {
@@ -533,7 +549,7 @@ ___TEMPLATE_PARAMETERS___
             "lineCount": 10,
             "textAsList": true,
             "help": "enter one event name (after changes defined in this client) per line to be marked as GA4 conversion",
-            "defaultValue": ""
+            "defaultValue": "purchase"
           },
           {
             "type": "CHECKBOX",
@@ -553,7 +569,7 @@ ___SANDBOXED_JS_FOR_SERVER___
 
 /**
  * @description Custom Google Tag Manager Client Template for walker.js
- * @version 0.1.1
+ * @version 0.2.1
  * @see {@link https://github.com/elbwalker|elbwalker on GitHub} for more about walker.js
  */
 const claimRequest = require('claimRequest');
@@ -576,6 +592,7 @@ const makeNumber = require('makeNumber');
 const sendHttpGet = require("sendHttpGet");
 const getTimestampMillis = require("getTimestampMillis");
 const templateDataStorage = require('templateDataStorage');
+const Object = require('Object');
 
 //helper
 
@@ -625,13 +642,26 @@ const returnWalkerJs = function(scriptBody, isCached) {
   returnResponse();
 };    
  
+/**
+ * adds array data from walker.js script as event parameters. 
+ * Object has no "assign" method in this sandbox :(
+ * @param {object} event - object to add parameters.
+ * @param {object} dims - object to add.
+ */
+const addParamsFromArray = function(event, dims) {
+  if (dims && typeof(dims === "object")) {
+    for (var key in dims) {
+      event[key] = dims[key];
+    }  
+  }
+};
 
 /******************************************************************/
 
 const requestPath = getRequestPath();
 
 //claim elbwalker requests
-if (requestPath === '/elbwalker') {
+if (requestPath === (data.endpointPath || '/elbwalker')) {
 
   claimRequest();
   setResponseHeader("Access-Control-Allow-Origin", "*");
@@ -677,11 +707,11 @@ if (requestPath === '/elbwalker') {
   } else {
 
     var cid = valueByPath(evtData, "user.device") || 
-              valueByPath(evtData, "user.hash") || 
+              valueByPath(evtData, "user.session") || valueByPath(evtData, "user.hash") || 
               valueByPath(evtData, data.clientIdSource) || fallbackSession;
     var snum = valueByPath(evtData, data.sessionNumberSource || "globals.session_number") || "1";
     var sid = valueByPath(evtData, "globals.session_started") || 
-              valueByPath(evtData, data.clientIdSource) || fallbackSession;
+              valueByPath(evtData, data.sessionIdSource) || fallbackSession;
   }
   
   var evName = evtData.event || "elb_event";
@@ -696,7 +726,7 @@ if (requestPath === '/elbwalker') {
       }
   }
   
-  var loc = (evtData.globals||{}).page_location || ref;
+  var loc = (evtData.source||{}).id || ref;
   var event = { anonymize_ip: true,
                 event_name: evName,
                 client_id : cid,
@@ -714,7 +744,7 @@ if (requestPath === '/elbwalker') {
   if (evtData.user && evtData.user.id)  
     createField(event, "user_id", evtData.user.id);
  
-  createField(event, "page_referrer", (evtData.globals||{}).page_referrer);
+  createField(event, "page_referrer", (evtData.source||{}).previous_id);
   createField(event, "client_timestamp", evtData.timestamp);
   createField(event, "event_category", evtData.entity);
   createField(event, "event_action", evtData.action||evName);
@@ -732,39 +762,26 @@ if (requestPath === '/elbwalker') {
   event.ga_session_number = snum;
   event.ga_session_id = sid;
 
+  //use consent as event parameters
+  if (data.globalsAsParams === true) 
+    addParamsFromArray(event, evtData.consent);
+  
+  
   //use globals as event parameters
-  if (data.globalsAsParams === true) {
-    var dims = evtData.globals;
-    if (dims && typeof(dims === "object")) {
-      for (var key in dims) {
-        event[key] = dims[key];
-      }  
-    }
-  }
+  if (data.globalsAsParams === true) 
+    addParamsFromArray(event, evtData.globals);
   
   //use context data as event parameters
-  if (data.contextAsParams === true) {
-    var dims = evtData.context;
-    if (dims && typeof(dims === "object")) {
-      for (var key in dims) {
-        event[key] = dims[key];
-      }  
-    }
-  }
+  if (data.contextAsParams === true) 
+    addParamsFromArray(event, evtData.context);
 
   //use data as event parameters
-  if (data.dataAsParams === true) {
-    var dims = evtData.data;
-    if (dims && typeof(dims === "object")) {
-      for (var key in dims) {
-        event[key] = dims[key];
-      }  
-    }
-  }
-  
+  if (data.dataAsParams === true) 
+    addParamsFromArray(event, evtData.data);
+    
   if (data.nestedToItems === true) {
     var items = [];
-    evtData.nested.filter(
+    (evtData.nested||{}).filter(
       x => x.type==data.nestedType
     ).forEach(
       x => items.push(x.data)
