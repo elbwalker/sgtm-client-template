@@ -1,162 +1,230 @@
-/* 
--------------------------------------------------------------  
-EXAMPLE walker.js TRACKING IMPLEMENTATION FOR SERVER-SIDE GTM  
--------------------------------------------------------------  
+/*
+  -------------------------------------------------------------
+  EXAMPLE walker.js TRACKING IMPLEMENTATION FOR SERVER-SIDE GTM
+  -------------------------------------------------------------
 */
 
-//send as image in case of CORS issues
-window._walkerSettings = {}
-window._walkerSettings.sendAsImage = document.currentScript.getAttribute('data-sendimg') !== "false";
-window._walkerSettings.sendBase64 = document.currentScript.getAttribute('data-base64') !== "false";
-window._walkerSettings.version = document.currentScript.getAttribute('data-version');
-//ssGTM endpoint
-window._walkerSettings.endpointUrl = document.currentScript.getAttribute('data-endpoint') || "https://httpbin.org/anything";
-//load walker.js from custom path
-window._walkerSettings.walkerpath = document.currentScript.getAttribute('data-walkerpath');
+(function () {
+  // @TODO change this or use data-endpoint when loading (see examlpe HTML file)
+  setup_endpointUrl = document.currentScript.getAttribute('data-endpoint') || "https://httpbin.org/anything"; 
 
-//TO DO: "fake" consent - just to remind you that there should be consent or you can not handle user and session state
-window._walkerSettings.doAnalytics = window.location.href.indexOf('noconsent') < 0;
+  // Ignore Bot-traffic
+  if (isBot(navigator.userAgent)) return;
 
-/*************** END SETUP *****************/
+  // General walker configuration
+  elb("walker config", {
+    // Empty initial consent state
+    consent: {},
+    // Add common event parameters to each event
+    globals: { page_title: document.title },
+    // Current version of the tracking setup
+    version: 1,
+  });
 
-//simple session and client handling - switch to cookies or move server-side if you like
-function getSessionData() {
-  if (window._walkerSettings.doAnalytics !== true) return;
-  var sts = window.sessionStorage.getItem("lg_sts");
-  var sid = window.sessionStorage.getItem("lg_sid");
-  var sct = window.localStorage.getItem("lg_sct") || 0;
-  var cid = window.localStorage.getItem("lg_cid");
 
-  var sStart = false;
+  // DEMO Destination to log events to console
+  elb("walker destination", {
+    // optionally use a custom consent to activate this via elb("walker consent", {demo: true}) in the console
+    // config: { consent: { demo: true } },
+    push: function (event) {
+      console.log("DEMO", event);
+    },
+  });
 
-  if (!sts) {
-    //new session
-    sStart = true;
-    sts = Math.round(Date.now() / 1000);
-    sid = Math.round(Math.random() * 10000000000);
-    window.sessionStorage.setItem("lg_sts", sts);
-    window.sessionStorage.setItem("lg_sid", sid);
-    sct++;
-    window.localStorage.setItem("lg_sct", sct);
-  }
+  // SGTM Destination to send to server-side GTM-Client
+  elb("walker destination", {
+    config: {
+      consent: { functional: true },
+      custom: {
+        sendBase64: false,
+        sendAsImage: false,
+        endpointUrl: setup_endpointUrl,
+        globals: {},
+      },
+    },
+    init: function (config) {
+      var globals = config.custom.globals;
 
-  //simple user management via localStorage as well - switch to cookies or set
-  //server-side id cookie for a more robust identification of returning visitors 
-  if (!cid) {
-    //just paste random session id and timestamp for a new persistent client id
-    cid = sts+"."+sid;
-    window.localStorage.setItem("lg_cid", cid);
-  }
+      var sessionStartTimestamp = window.sessionStorage.getItem("lg_sts");
+      // var sid = window.sessionStorage.getItem('lg_sid');
+      var sessionNumber = window.localStorage.getItem("lg_sct") || 0;
+      // var cid = window.localStorage.getItem('lg_cid');
+      var sessionStart = false;
 
-  return {
-    sessionId: sid, 
-    sessionNumber: sct, 
-    sessionStartTimestamp: sts, 
-    clientId: cid, 
-    sessionStart: sStart
-  };
-}
+      // No active session yet
+      if (!sessionStartTimestamp) {
+        // New session
+        sessionStart = true;
+        sessionStartTimestamp = Math.round(Date.now() / 1000);
+        window.sessionStorage.setItem("lg_sts", sessionStartTimestamp);
+        sessionNumber++;
+        window.localStorage.setItem("lg_sct", sessionNumber);
+      }
 
-//function to push data to queue
+      // Add global session parameters for GA4 processing in sGTM
+      globals.session_started = sessionStartTimestamp;
+      globals.session_number = sessionNumber;
+
+      // Session start marker for GA4
+      if (sessionStart === true) globals.session_start = true;
+
+      // successfull init
+      return true;
+    },
+    push: function (event, config) {
+      // Add the destination's globals to the event
+      event.globals = Object.assign(config.custom.globals, event.globals);
+
+      sendToApi(event, config.custom);
+
+      // Only push session_start once
+      if (event.globals.session_start) delete event.globals.session_start;
+
+      console.log("SGTM", event);
+    },
+  });
+
+  // MARKETING Destination to send events to an example marketing tool
+  elb("walker destination", {
+    // Require marketing consent to use this destination
+    config: { consent: { marketing: true } },
+    init: function () {
+      // Load the 3rd party script and setup
+      return true;
+    },
+    push: function (event) {
+      // Do something ...
+      console.log("MARKETING", event);
+    },
+  });
+
+  // Start the magic!
+  elb("walker run");
+})();
+
 function elb() {
   (window.elbLayer = window.elbLayer || []).push(arguments);
 }
 
-(function(w,a,l,k,e,r){
-  w = window; 
-  a = document.referrer;
-  l = document.location.href;
-  k = document.title;
-  r = w._walkerSettings.endpointUrl;
+// Code snippets for consent choice
+// Simulate the CMPs functionality
 
-  //load walker.js?
-  var wp = w._walkerSettings.walkerpath;
-  if (wp) {
-    var wsc = document.createElement("script");
-    wsc.type = "text/javascript"; 
-    wsc.className = "elbwalker"
-    wsc.dataset.version = w._walkerSettings.version||"1"
-    wsc.async = true; 
-    wsc.defer = true; 
-    wsc.src = wp; 
-    document.head.appendChild(wsc);
+function consentAccept() {
+  window.localStorage.setItem("consentState", "accepted");
+  consentRefresh();
+
+  // see walker-init.js
+  consentGranted();
+}
+function consentDeny() {
+  window.localStorage.setItem("consentState", "denied");
+  consentRefresh();
+
+  // see walker-init.js
+  consentDenied();
+}
+function consentReset() {
+  window.localStorage.removeItem("consentState");
+  consentRefresh();
+}
+function consentRefresh() {
+  var consentStateElem = document.getElementById("consent_state");
+  var consentState = window.localStorage.getItem("consentState") || "unknown";
+
+  if (consentState == "accepted") consentGranted();
+  if (consentState == "denied") consentDenied();
+
+  consentStateElem.innerText = consentState;
+}
+
+consentRefresh();
+
+function consentGranted() {
+  // Set session and device ids
+  elb("walker user", getUser());
+
+  // Allow sending events to functional and marketing destinations
+  elb("walker consent", { functional: true, marketing: true });
+}
+
+function consentDenied() {
+  // Check for strict opt-out settings
+  if (window.location.href.indexOf("noconsent") < 0) {
+    const user = getUser();
+
+    // Only set a random session id, but no persistant device id
+    elb("walker user", { session: user.session, id: "anonymous" });
+    // Alternatively: Use campaign information (e.g. utm_campaign) as sessionId to further depersonalize
+
+    // Actively forbit sending data in general (e.g. by opt-out) by setting functional=false
   }
 
-  //minimal bot detection, "stolen" from Trackboxx (https://cdn.trackboxx.info/p/tracker.js)
-  if (/bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex/i.test(navigator.userAgent)) return false;
+  // Allow sending events to functional destinations at most
+  elb("walker consent", { functional: true, marketing: false });
+}
 
-  const addGlobal = function(cnt){
-    var sp = document.createElement("span");
-    sp.dataset.elbglobals = cnt;
-    document.body.appendChild(sp);
+// General walker.js user identification
+function getUser() {
+  const sessionKey = "elb_user_sessionId";
+  const deviceKey = "elb_user_deviceId";
+  var session = window.sessionStorage.getItem(sessionKey);
+  var device = window.localStorage.getItem(deviceKey);
+
+  if (!session) {
+    session = Math.round(Math.random() * 10000000000);
+    window.sessionStorage.setItem(sessionKey, session);
+  }
+
+  if (!device) {
+    device = Math.round(Math.random() * 10000000000);
+    window.localStorage.setItem(deviceKey, device);
+  }
+
+  return {
+    session,
+    device,
   };
-  
-  //add some "globals" to DOM as elements
-  //TO DO: add other elements here, if needed in every event
-  if ((w._walkerSettings.sendBase64 !== true) && 
-      (w._walkerSettings.sendAsImage === true)) {
-      l = l.split("#")[0];
-  } 
-  
-  //globals for standard GA4 event parameters
-  addGlobal("page_location:'"+l+"'");
-  addGlobal("page_title:'"+k+"'");
-  if (a) addGlobal("page_referrer:'"+a+"'");
+}
 
-  //send consent with every event: can be used in ssGTM to trigger specific tags. 
-  //Adjust to match your needs and send a list of allowed services or set of markers
-  //like this one: 
-  addGlobal("analytics_consent:'"+w._walkerSettings.doAnalytics+"'");
+function isBot(s) {
+  // Minimal bot detection, "stolen" from Trackboxx (https://cdn.trackboxx.info/p/tracker.js)
+  return /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex/i.test(s);
+}
 
-  //call session handling and set user attributes + elements for session id and number 
-  var sD = getSessionData();
-  if (sD) {
-  elb("walker user", {hash: sD.sessionId, device: sD.clientId});
-  //add global session parameters for GA4 processing in ssGTM
-  addGlobal("session_started:'"+sD.sessionStartTimestamp+"'");
-  addGlobal("session_number:'"+sD.sessionNumber+"'");
-  //session start marker for GA4
-  if (sD.sessionStart === true)
-      addGlobal("session_start:true");
+// Sending data to an API endpoint
+function sendToApi(event, config) {
+  if (
+    event.data &&
+    event.data.hash &&
+    config.sendBase64 !== true &&
+    config.sendAsImage === true
+  ) {
+    event.data.hash = event.data.hash.replace("#", "");
   }
-
-  //send hit as image request to avoid CORS problems, beacon and AJAX are (better) options in any other case
-  elb("walker destination", { push: 
-    function (event) {
-      if (event.data && event.data.hash && 
-      (w._walkerSettings.sendBase64 !== true) && 
-      (w._walkerSettings.sendAsImage === true)) {
-      event.data.hash = event.data.hash.replace("#", "");
-      } 
-      var obs = JSON.stringify(event);
-      //base64 coding for serialized object    
-      if (obs === "{}") 
-      obs = ""; 
-      else if (w._walkerSettings.sendBase64 === true) 
-      obs = btoa(unescape(encodeURIComponent(obs)));
-      var params = (obs !== "") ? "?o=" + encodeURI(obs) : "";
-      if (w.XMLHttpRequest) e = new XMLHttpRequest();
-      if ((e != null) && (w._walkerSettings.sendAsImage !== true)) {
-        e.open("POST", r, true);
-        //you might have to change this to "application/json" depending
-        //on your endpoint
-        e.setRequestHeader("Content-Type", "text/plain");
-        e.send(obs);
-        //alternative method: use fetch() - okay for almost every browser
-        /*
-        fetch(r, {method: "POST", cache: "no-cache", 
-          headers: {
-            "X-Gtm-Server-Preview":"xxxx", 
-            "Content-Type": "application/json"
-          }, body: obs}
-        );
-        */
-      } else  
-        (new Image()).src = r + params;
-      //log event to console for debugging purposes 
-      console.log(event);
-    }
-  }); 
-  //start the magic!
-  elb("walker run");
-})();
+  var obs = JSON.stringify(event);
+  //base64 coding for serialized object
+  if (obs === "{}") obs = "";
+  else if (config.sendBase64 === true)
+    obs = btoa(unescape(encodeURIComponent(obs)));
+  var params = obs !== "" ? "?o=" + encodeURI(obs) : "";
+  var e;
+  if (window.XMLHttpRequest) e = new XMLHttpRequest();
+  if (e && config.sendAsImage !== true) {
+    e.open("POST", config.endpointUrl, true);
+    //you might have to change this to "application/json" depending
+    //on your endpoint
+    e.setRequestHeader("Content-Type", "text/plain");
+    e.send(obs);
+    //alternative method: use fetch() - okay for almost every browser
+    /*
+      fetch(r, {method: "POST", cache: "no-cache",
+        headers: {
+          "X-Gtm-Server-Preview":"xxxx",
+          "Content-Type": "application/json"
+        }, body: obs}
+      );
+      */
+  } else {
+    new Image().src = config.endpointUrl + params;
+  }
+}
