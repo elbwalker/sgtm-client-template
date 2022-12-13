@@ -8,7 +8,7 @@ instead of a real ssGTM endpoint per default.
 - debug ssGTM in preview to see events and event data
 
 ## Transport Options
-The init script can be configured to use POST instead of GET requests when sending events to the ssGTM destination by adding `data-sendimg="false"`. You can also switch off base64 coding by adding  a `data-base64="false"` attribute. 
+The init script can be configured to use POST instead of GET requests when sending events to the ssGTM destination by using the `setup_xxx` variables at the top of the script. You can also switch or or off base64 coding. 
 
 See source code for more information about how to use the ssGTM client template and sample init script to load and configure walker.js for sending events to ssGTM.  
 
@@ -16,13 +16,7 @@ See source code for more information about how to use the ssGTM client template 
 In this example you will find a few elements and event parameters that are neccessary to feed GA4 with enough information to process every event like it was sent by gtag.js. 
 
 ### Globals
-`init-walker.js` adds some (span) elements to the DOM to set sole global values that will travel with avery event in the `globals` section. They are there to make sure that every event (not just a *page view*) includes the basic attributes that evey event should have. Those are:
-
-- page_location
-- page_title 
-- page_referrer
-
-Since `walker.js` will add some changes that will make setting those attributes easier, the current setup of the init script is some kind of workaround for GA4. 
+`init-walker.js` adds some `globals` to the configuration to set global values that will travel with every event. They are there to make sure that every event (not just a *page view*) includes the basic attributes that evey event should have. This is only the page_title in this example but you could add more data here. 
 
 Additionaly there is a key called `analytics_consent` that serves as a replacement for a real implementation of a field that allows to know and respect what can be done with every event ehen it hits se server-side GTM container.  
 
