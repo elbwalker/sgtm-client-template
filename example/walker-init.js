@@ -5,8 +5,17 @@
 */
 
 (function () {
+
+  // *************** SETUP ***************************
+
   // @TODO change this or use data-endpoint when loading (see examlpe HTML file)
   setup_endpointUrl = document.currentScript.getAttribute('data-endpoint') || "https://httpbin.org/anything"; 
+
+  //send as image in case of CORS issues
+  setup_sendAsImage = false;
+  setup_sendBase64 = false;
+
+// *************** END SETUP ***********************
 
   // Ignore Bot-traffic
   if (isBot(navigator.userAgent)) return;
@@ -36,8 +45,8 @@
     config: {
       consent: { functional: true },
       custom: {
-        sendBase64: false,
-        sendAsImage: false,
+        sendBase64: setup_sendBase64,
+        sendAsImage: setup_sendAsImage,
         endpointUrl: setup_endpointUrl,
         globals: {},
       },
