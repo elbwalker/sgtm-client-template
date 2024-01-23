@@ -125,8 +125,8 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ],
-        "help": "Enter the walker.js version you\u0027d like to use. Use the X.X.X format as specified on the walker.js Github repo, e. g. 1.5.3",
-        "defaultValue": "1.5.3"
+        "help": "Enter the walker.js version you\u0027d like to use. Use the X.X.X format as specified on the walker.js Github repo, e. g. 2.0.0",
+        "defaultValue": "2.0.0"
       },
       {
         "type": "LABEL",
@@ -437,8 +437,8 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "type": "CHECKBOX",
-            "name": "globalsAsParams",
-            "checkboxText": "Add \"globals\" As Event Parameters",
+            "name": "dataAsParams",
+            "checkboxText": "Add \"data\" As Event Parameters",
             "simpleValueType": true,
             "defaultValue": true
           },
@@ -451,8 +451,15 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "type": "CHECKBOX",
-            "name": "dataAsParams",
-            "checkboxText": "Add \"data\" As Event Parameters",
+            "name": "globalsAsParams",
+            "checkboxText": "Add \"globals\" As Event Parameters",
+            "simpleValueType": true,
+            "defaultValue": true
+          },
+          {
+            "type": "CHECKBOX",
+            "name": "customAsParams",
+            "checkboxText": "Add \"custom\" As Event Parameters",
             "simpleValueType": true,
             "defaultValue": true
           },
@@ -749,10 +756,12 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
   createField(event, "event_category", evtData.entity);
   createField(event, "event_action", evtData.action||evName);
   createField(event, "event_id", evtData.id);
+  
+  var version = (evtData.version||{});
 
   //add some walker.js properties
-  createField(event, "x-elb-config-version", (evtData.version||{}).config||0);
-  createField(event, "x-elb-walker-version", (evtData.version||{}).walker||0);
+  createField(event, "x-elb-config-version", version.config||version.tagging||0);
+  createField(event, "x-elb-walker-version", version.walker||version.client||0);
   createField(event, "x-elb-event", evtData);
 
   //add proprietary Google Analytics properties
@@ -763,9 +772,8 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
   event.ga_session_id = sid;
 
   //use consent as event parameters
-  if (data.globalsAsParams === true) 
+  if (data.consentAsParams === true) 
     addParamsFromArray(event, evtData.consent);
-  
   
   //use globals as event parameters
   if (data.globalsAsParams === true) 
@@ -778,7 +786,14 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
   //use data as event parameters
   if (data.dataAsParams === true) 
     addParamsFromArray(event, evtData.data);
-    
+
+  //use custom as event parameters
+  if (data.customAsParams === true) {
+    require('logToConsole')(evtData.custom);
+    require('logToConsole')(typeof(evtData.custom));
+    addParamsFromArray(event, evtData.custom);
+  }
+  
   if (data.nestedToItems === true) {
     var items = [];
     (evtData.nested||{}).filter(
@@ -1012,6 +1027,24 @@ ___SERVER_PERMISSIONS___
     },
     "clientAnnotations": {
       "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "debug"
+          }
+        }
+      ]
     },
     "isRequired": true
   }
