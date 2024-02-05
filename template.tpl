@@ -512,13 +512,7 @@ ___TEMPLATE_PARAMETERS___
             "simpleValueType": true,
             "defaultValue": "globals.session_start",
             "help": "if you want to send data to GA4, a value must be present in a certain key (default: globals.session_start). Define a fallback path here. Any \"truthy\" value will trigger a \"session_start\" marker in incoming events if the event counter (\"count\") indicates the first event after loading. An additional \"first_visit\" marker is added in case the session number equals \"1\".",
-            "enablingConditions": [
-              {
-                "paramName": "sessionDataSource",
-                "paramValue": "request",
-                "type": "EQUALS"
-              }
-            ]
+            "enablingConditions": []
           },
           {
             "type": "CHECKBOX",
@@ -1059,3 +1053,4 @@ scenarios: []
 ___NOTES___
 
 Created on 20.12.2020, 02:26:15
+
