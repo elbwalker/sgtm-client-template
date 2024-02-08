@@ -2,5 +2,5 @@ homepage: "https://www.elbwalker.com"
 documentation: "https://github.com/elbwalker/sgtm-client-template/#readme"
 versions:
   # Latest version
-  - sha: 8a4ace888cd7f03bafe58312b4f586f5804c741c
+  - sha: 21abe048726da86630cd257d0946f5431d5e83b9
     changeNotes: Initial release.
