@@ -573,6 +573,7 @@ ___SANDBOXED_JS_FOR_SERVER___
  * @version 0.2.1
  * @see {@link https://github.com/elbwalker|elbwalker on GitHub} for more about walker.js
  */
+const getType = require('getType');
 const claimRequest = require('claimRequest');
 const returnResponse = require('returnResponse');
 const runContainer = require('runContainer');
@@ -613,6 +614,8 @@ const createField = (event, fieldName, val) => {
  * @param {string} path - (user defined) path to value using regular JS / "dot" notation.
  */
 const valueByPath = (ob, path) => {
+  //if there is no valid path, return the path name / object
+  if (getType(path) !== "string") return path; 
   return path.split('.').reduce(function(o, k) {
     var ind = k.indexOf('[');
     var ind2 = k.indexOf(']');
@@ -783,8 +786,6 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
 
   //use custom as event parameters
   if (data.customAsParams === true) {
-    require('logToConsole')(evtData.custom);
-    require('logToConsole')(typeof(evtData.custom));
     addParamsFromArray(event, evtData.custom);
   }
   
@@ -1023,24 +1024,6 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "debug"
-          }
-        }
-      ]
-    },
-    "isRequired": true
   }
 ]
 
@@ -1053,4 +1036,5 @@ scenarios: []
 ___NOTES___
 
 Created on 20.12.2020, 02:26:15
+
 
