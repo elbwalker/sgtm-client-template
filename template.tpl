@@ -155,156 +155,224 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Most analytics tags (not only GA4) need at least a session id in order to know how to bundle events to a session. A separate client id is needed to recognize visitors beyond single sessions. If you want to use a GA4 tag, a session number is also mandatory. Leave fields blank to use fallback or default values."
       },
       {
-        "type": "SELECT",
-        "name": "sessionDataSource",
-        "displayName": "Source",
-        "macrosInSelect": false,
-        "selectItems": [
-          {
-            "value": "request",
-            "displayValue": "Event Data"
-          },
-          {
-            "value": "user",
-            "displayValue": "User-Defined"
-          },
-          {
-            "value": "cookie",
-            "displayValue": "Cookies"
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "request"
-      },
-      {
-        "type": "TEXT",
-        "name": "sessionIdValue",
+        "type": "GROUP",
+        "name": "groupSessionID",
         "displayName": "Session ID",
-        "simpleValueType": true,
-        "help": "enter constant or define variable to populate the session id. If none is present, a random number will be used inste",
-        "enablingConditions": [
+        "groupStyle": "NO_ZIPPY",
+        "subParams": [
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "user",
-            "type": "EQUALS"
+            "type": "SELECT",
+            "name": "sessionDataSource",
+            "displayName": "Source",
+            "macrosInSelect": false,
+            "selectItems": [
+              {
+                "value": "request",
+                "displayValue": "Event Data"
+              },
+              {
+                "value": "user",
+                "displayValue": "User-Defined"
+              },
+              {
+                "value": "cookie",
+                "displayValue": "Cookies"
+              }
+            ],
+            "simpleValueType": true,
+            "defaultValue": "request"
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionIdSource",
+            "displayName": "Session ID Source Path",
+            "simpleValueType": true,
+            "defaultValue": "user.session",
+            "help": "enter additional lookup path to session id information in incoming events (default: user.session), if not sent as \"globals.session_started\". Will be a changing timestamp if no value is present anywhere",
+            "enablingConditions": [
+              {
+                "paramName": "sessionDataSource",
+                "paramValue": "request",
+                "type": "EQUALS"
+              }
+            ]
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionIdValue",
+            "displayName": "Session ID",
+            "simpleValueType": true,
+            "help": "enter constant or define variable to populate the session id. If none is present, a random number will be used inste",
+            "enablingConditions": [
+              {
+                "paramName": "sessionDataSource",
+                "paramValue": "user",
+                "type": "EQUALS"
+              }
+            ],
+            "valueValidators": []
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionCookieName",
+            "displayName": "Session ID Cookie-Name",
+            "simpleValueType": true,
+            "alwaysInSummary": false,
+            "enablingConditions": [
+              {
+                "paramName": "sessionDataSource",
+                "paramValue": "cookie",
+                "type": "EQUALS"
+              }
+            ]
           }
-        ],
-        "valueValidators": []
+        ]
       },
       {
-        "type": "TEXT",
-        "name": "sessionNumberValue",
+        "type": "GROUP",
+        "name": "groupSessionNumber",
         "displayName": "Session Number",
-        "simpleValueType": true,
-        "help": "enter constant or define variable to populate the session number (fallback will be \"1\")",
-        "enablingConditions": [
+        "groupStyle": "NO_ZIPPY",
+        "subParams": [
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "user",
-            "type": "EQUALS"
+            "type": "SELECT",
+            "name": "sessionNumberDataSource",
+            "displayName": "Source",
+            "macrosInSelect": false,
+            "selectItems": [
+              {
+                "value": "request",
+                "displayValue": "Event Data"
+              },
+              {
+                "value": "user",
+                "displayValue": "User-Defined"
+              },
+              {
+                "value": "cookie",
+                "displayValue": "Cookies"
+              }
+            ],
+            "simpleValueType": true,
+            "defaultValue": "request"
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionNumberSource",
+            "displayName": "Session Number Source Path",
+            "simpleValueType": true,
+            "defaultValue": "globals.session_number",
+            "help": "enter lookup path to session number information in incoming events (default: globals.session_number). Will be \"1\" if not available in request",
+            "enablingConditions": [
+              {
+                "paramName": "sessionNumberDataSource",
+                "paramValue": "request",
+                "type": "EQUALS"
+              }
+            ]
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionNumberValue",
+            "displayName": "Session Number",
+            "simpleValueType": true,
+            "help": "enter constant or define variable to populate the session number (fallback will be \"1\")",
+            "enablingConditions": [
+              {
+                "paramName": "sessionNumberDataSource",
+                "paramValue": "user",
+                "type": "EQUALS"
+              }
+            ],
+            "valueValidators": []
+          },
+          {
+            "type": "TEXT",
+            "name": "sessionNumberCookieName",
+            "displayName": "Session Number Cookie-Name",
+            "simpleValueType": true,
+            "alwaysInSummary": false,
+            "enablingConditions": [
+              {
+                "paramName": "sessionNumberDataSource",
+                "paramValue": "cookie",
+                "type": "EQUALS"
+              }
+            ]
           }
-        ],
-        "valueValidators": []
+        ]
       },
       {
-        "type": "TEXT",
-        "name": "clientIdValue",
+        "type": "GROUP",
+        "name": "groupClientID",
         "displayName": "Client ID",
-        "simpleValueType": true,
-        "help": "enter constant or define variable to populate the client id (fallback will be session id)",
-        "enablingConditions": [
+        "groupStyle": "NO_ZIPPY",
+        "subParams": [
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "user",
-            "type": "EQUALS"
-          }
-        ],
-        "valueValidators": []
-      },
-      {
-        "type": "TEXT",
-        "name": "sessionIdSource",
-        "displayName": "Session ID Source Path",
-        "simpleValueType": true,
-        "defaultValue": "user.session",
-        "help": "enter additional lookup path to session id information in incoming events (default: user.session), if not sent as \"globals.session_started\". Will be a changing timestamp if no value is present anywhere",
-        "enablingConditions": [
+            "type": "SELECT",
+            "name": "clientIdDataSource",
+            "displayName": "Source",
+            "macrosInSelect": false,
+            "selectItems": [
+              {
+                "value": "request",
+                "displayValue": "Event Data"
+              },
+              {
+                "value": "user",
+                "displayValue": "User-Defined"
+              },
+              {
+                "value": "cookie",
+                "displayValue": "Cookies"
+              }
+            ],
+            "simpleValueType": true,
+            "defaultValue": "request"
+          },
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "request",
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
-        "type": "TEXT",
-        "name": "sessionNumberSource",
-        "displayName": "Session Number Source Path",
-        "simpleValueType": true,
-        "defaultValue": "globals.session_number",
-        "help": "enter lookup path to session number information in incoming events (default: globals.session_number). Will be \"1\" if not available in request",
-        "enablingConditions": [
+            "type": "TEXT",
+            "name": "clientIdSource",
+            "displayName": "Client ID Source Path",
+            "simpleValueType": true,
+            "defaultValue": "user.device",
+            "help": "enter lookup path to client id in incoming events (default: user.device). Will be set to session id if not available in request as \"user.device\" or \"user.session\".",
+            "enablingConditions": [
+              {
+                "paramName": "clientIdDataSource",
+                "paramValue": "request",
+                "type": "EQUALS"
+              }
+            ]
+          },
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "request",
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
-        "type": "TEXT",
-        "name": "clientIdSource",
-        "displayName": "Client ID Source Path",
-        "simpleValueType": true,
-        "defaultValue": "user.device",
-        "help": "enter lookup path to client id in incoming events (default: user.device). Will be set to session id if not available in request as \"user.device\" or \"user.session\".",
-        "enablingConditions": [
+            "type": "TEXT",
+            "name": "clientIdValue",
+            "displayName": "Client ID",
+            "simpleValueType": true,
+            "help": "enter constant or define variable to populate the client id (fallback will be session id)",
+            "enablingConditions": [
+              {
+                "paramName": "clientIdDataSource",
+                "paramValue": "user",
+                "type": "EQUALS"
+              }
+            ],
+            "valueValidators": []
+          },
           {
-            "paramName": "sessionDataSource",
-            "paramValue": "request",
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
-        "type": "TEXT",
-        "name": "sessionCookieName",
-        "displayName": "Session ID Cookie-Name",
-        "simpleValueType": true,
-        "alwaysInSummary": false,
-        "enablingConditions": [
-          {
-            "paramName": "sessionDataSource",
-            "paramValue": "cookie",
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
-        "type": "TEXT",
-        "name": "sessionNumberName",
-        "displayName": "Session Number Cookie-Name",
-        "simpleValueType": true,
-        "alwaysInSummary": false,
-        "enablingConditions": [
-          {
-            "paramName": "sessionDataSource",
-            "paramValue": "cookie",
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
-        "type": "TEXT",
-        "name": "clientCookieName",
-        "displayName": "Client ID Cookie-Name",
-        "simpleValueType": true,
-        "alwaysInSummary": false,
-        "enablingConditions": [
-          {
-            "paramName": "sessionDataSource",
-            "paramValue": "cookie",
-            "type": "EQUALS"
+            "type": "TEXT",
+            "name": "clientCookieName",
+            "displayName": "Client ID Cookie-Name",
+            "simpleValueType": true,
+            "alwaysInSummary": false,
+            "enablingConditions": [
+              {
+                "paramName": "clientIdDataSource",
+                "paramValue": "cookie",
+                "type": "EQUALS"
+              }
+            ]
           }
         ]
       }
@@ -506,15 +574,6 @@ ___TEMPLATE_PARAMETERS___
             "displayName": "All settings in this section are only relevant if you want to send walker.js events to GA4."
           },
           {
-            "type": "TEXT",
-            "name": "sessionStartPath",
-            "displayName": "GA4 Session Start Marker Path",
-            "simpleValueType": true,
-            "defaultValue": "globals.session_start",
-            "help": "if you want to send data to GA4, a value must be present in a certain key (default: globals.session_start). Define a fallback path here. Any \"truthy\" value will trigger a \"session_start\" marker in incoming events if the event counter (\"count\") indicates the first event after loading. An additional \"first_visit\" marker is added in case the session number equals \"1\".",
-            "enablingConditions": []
-          },
-          {
             "type": "CHECKBOX",
             "name": "nestedToItems",
             "checkboxText": "Convert \"nested\" To \"items\"",
@@ -558,6 +617,62 @@ ___TEMPLATE_PARAMETERS___
             "checkboxText": "Send GA4 Debug Flag",
             "simpleValueType": true,
             "help": "activate for enabling GA4 DebugView"
+          },
+          {
+            "type": "GROUP",
+            "name": "GrpSessionStartMarker",
+            "displayName": "Session Start Marker",
+            "groupStyle": "NO_ZIPPY",
+            "subParams": [
+              {
+                "type": "SELECT",
+                "name": "sessionStartDataSource",
+                "displayName": "Source",
+                "macrosInSelect": false,
+                "selectItems": [
+                  {
+                    "value": "request",
+                    "displayValue": "Event Data"
+                  },
+                  {
+                    "value": "user",
+                    "displayValue": "User-Defined"
+                  }
+                ],
+                "simpleValueType": true,
+                "defaultValue": "request"
+              },
+              {
+                "type": "TEXT",
+                "name": "sessionStartPath",
+                "displayName": "GA4 Session Start Marker Path",
+                "simpleValueType": true,
+                "defaultValue": "globals.session_start",
+                "help": "if you want to send data to GA4, a value must be present in a certain key (default: globals.session_start). Define a fallback path here. Any \"truthy\" value will trigger a \"session_start\" marker in incoming events if the event counter (\"count\") indicates the first event after loading. An additional \"first_visit\" marker is added in case the session number equals \"1\".",
+                "enablingConditions": [
+                  {
+                    "paramName": "sessionStartDataSource",
+                    "paramValue": "user",
+                    "type": "NOT_EQUALS"
+                  }
+                ]
+              },
+              {
+                "type": "TEXT",
+                "name": "sessionStartVar",
+                "displayName": "GA4 Session Start Marker Variable",
+                "simpleValueType": true,
+                "defaultValue": "",
+                "help": "if you want to send data to GA4, define a variable for a marker here. Any \"truthy\" value will trigger a \"session_start\" marker in incoming events if the event counter (\"count\") indicates the first event after loading. An additional \"first_visit\" marker is added in case the session number equals \"1\".",
+                "enablingConditions": [
+                  {
+                    "paramName": "sessionStartDataSource",
+                    "paramValue": "user",
+                    "type": "EQUALS"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -697,25 +812,32 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
 
   //session id or client id can be included in request or user as defined fields   
   if (data.sessionDataSource === "user") {
-    
     var sid = data.sessionIdValue || fallbackSession;
-    var snum = data.sessionNumberValue || "1";
-    var cid = data.clientIdValue || sid;
-    
   } else if (data.sessionDataSource === "cookie") {
-    
     var sid = getCookie(data.sessionCookieName)[0] || fallbackSession;
-    var snum = getCookie(data.sessionNumberCookieName)[0] || "1";
-    var cid = getCookie(data.clientCookieName)[0] || fallbackSession;
-    
   } else {
+    if (!data.sessionIdSource  || data.sessionIdSource === "") data.sessionIdSource = "globals.session_started";
+    var sid = valueByPath(evtData, data.sessionIdSource) || fallbackSession;
+  }
+  
+  if (data.sessionNumberDataSource === "user") {
+    var snum = data.sessionNumberValue || "1";
+  } else if (data.sessionDataSource === "cookie") {
+    var snum = getCookie(data.sessionNumberCookieName)[0] || "1";
+  } else {
+    if (!data.sessionNumberSource || data.sessionNumberSource === "") data.sessionNumberSource = "globals.session_number";
+    var snum = valueByPath(evtData, data.sessionNumberSource) || "1";
+  }
 
-    var cid = valueByPath(evtData, "user.device") || 
+  if (data.clientIdDataSource === "user") {
+    var cid = data.clientIdValue || sid;
+  } else if (data.sessionDataSource === "cookie") {
+    var cid = getCookie(data.clientCookieName)[0] || fallbackSession;
+  } else {
+    if (!data.clientIdSource || data.clientIdSource === "") data.clientIdSource = "user.device";
+    var cid = valueByPath(evtData, data.clientIdSource) || valueByPath(evtData, "user.device") || 
               valueByPath(evtData, "user.session") || valueByPath(evtData, "user.hash") || 
-              valueByPath(evtData, data.clientIdSource) || fallbackSession;
-    var snum = valueByPath(evtData, data.sessionNumberSource || "globals.session_number") || "1";
-    var sid = valueByPath(evtData, "globals.session_started") || 
-              valueByPath(evtData, data.sessionIdSource) || fallbackSession;
+              fallbackSession;
   }
   
   var evName = evtData.event || "elb_event";
@@ -750,8 +872,6 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
  
   createField(event, "page_referrer", (evtData.source||{}).previous_id);
   createField(event, "client_timestamp", evtData.timestamp);
-  createField(event, "event_category", evtData.entity);
-  createField(event, "event_action", evtData.action||evName);
   createField(event, "event_id", evtData.id);
   
   var version = (evtData.version||{});
@@ -807,11 +927,14 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
   
   //GA4 system properties
   var sprops = {};
-  var isStart = valueByPath(evtData, 
-      data.sessionStartPath || "globals.session_start") ? true : false;
+  if (!data.sessionStartPath || data.sessionStartPath === "") data.sessionStartPath = "globals.session_start";
+  var isStart = (data.sessionStartDataSource === "user") ? data.sessionStartVar : valueByPath(evtData, 
+      data.sessionStartPath);
+  isStart = (isStart == true);
   isStart = isStart && (makeNumber(evtData.count) === 1);
   if (isStart) sprops.ss = "1";
   if (isStart && (makeNumber(snum) === 1)) sprops.fv = "1";
+
   //use final event_name value
   if (data.conversionNames.indexOf(event.event_name) >= 0) sprops.c = "1";
   if (data.sendAsDebug === true) sprops.dbg = "1";
@@ -827,7 +950,6 @@ if (requestPath === (data.endpointPath || '/elbwalker')) {
     a client side timer will be needed and engagement time must be sent as
     parameter or set as field in this client manually 
     (using the advanced settings)
-  - how to handle "data" beyond page view events?   
   */
     
   runContainer(event, () => {  

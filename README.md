@@ -92,6 +92,11 @@ walker.js will make the use of this client as easy as possible. Still, using wal
 - adjustments for receiving and setting version information to fit 2.x (still compatible with older versions)
 - processing options for `custom` object from walker.js 2.x
 
+*2024-04-24*
+- **IMPORTANT**: changed method for defining sources for session ID, session number, client ID & session starts
+- no Universal Analytics event parameters `action`, `category`, `label`  
+- fixed error when getting session number from cookie
+
 ## Contact
 Contact [elbwalker](https://www.elbwalker.com/) for anything about walker.js implementation or reach out to [Markus Baersch](https://github.com/mbaersch) or [Justus Blümer](https://github.com/justusbluemer) about anything regarding this client template. 
 
