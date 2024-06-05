@@ -2,5 +2,8 @@ homepage: "https://www.elbwalker.com"
 documentation: "https://github.com/elbwalker/sgtm-client-template/#readme"
 versions:
   # Latest version
+  - sha: 044b87ee750890e5bc65857747c59225670a58b4
+    changeNotes: added compression for walker.js
+  # Older versions
   - sha: 6e686dad2853b72f6ea081ed5ac7020bec9e851c
     changeNotes: Initial release.
