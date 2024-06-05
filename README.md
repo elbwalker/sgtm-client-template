@@ -87,6 +87,9 @@ There are still some things that have to be manually added in any existing imple
 walker.js will make the use of this client as easy as possible. Still, using walker.js for GA4 needs some additional information (see example). If you run into any problems or have ideas how to enhance this client, feel free to contribute or [open an issue](https://github.com/elbwalker/sgtm-client-template/issues/new)!
 
 ## Release Notes
+*2024-06-05*
+- added compression for walker.js
+
 *2024-01-23*
 - changed default walker.js version to 2.0.0
 - adjustments for receiving and setting version information to fit 2.x (still compatible with older versions)

@@ -755,6 +755,8 @@ const returnWalkerJs = function(scriptBody, isCached) {
   setResponseStatus(200);
   setResponseBody(scriptBody);
   setResponseHeader("Content-Type", "text/javascript");
+  setResponseHeader("Content-Encoding", "gzip");
+  setResponseHeader("Vary", "accept-encoding");
   if (isCached) {
     setResponseHeader("x-sgtm-templatestorage-cached", "true");
   }
